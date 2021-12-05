@@ -1,5 +1,7 @@
 #pragma once
 #include <vector>
+#include <ctime>
+#include <cstdlib>
 
 #define BOARD_SIZE 4
 #define N2 6
@@ -19,7 +21,12 @@ private:
     void _getCoords(int& x, int& y);
 
 public:
-    static Game& init();
+    static Game& init() {
+        static Game instance;
+        srand(time(0));
+        return instance;
+    }
+
     Game(Game const&) = delete;
     Game(Game&&) = delete;
     Game operator=(Game const&) = delete;
@@ -65,4 +72,10 @@ public:
      * the game is not over
      */
     // void undo();
+
+    /** 
+     * @return true if the player has any possible moves left
+     * @return false otherwise
+     */
+    bool canPlay();
 };
