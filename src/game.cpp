@@ -1,0 +1,277 @@
+#include <iostream>
+#include <ctime>
+#include <cstdlib>
+#include <vector>
+#include "game.h"
+
+Game::Game() : _score{0} {
+    for (int i=0; i < BOARD_SIZE; ++i) {
+        std::vector<int> emptyRow(BOARD_SIZE, 0);
+        _board.push_back(emptyRow);
+    }
+}
+
+static Game::Game& Game::init() {
+    static Game::Game instance;
+    srand(time(0));
+    return instance;
+}
+
+bool Game::_flipCoin() {
+    rand();
+	return rand() % 2 == 0;
+}
+
+int Game::_weighted2or4() {
+    rand();
+	return rand() % D2 < N2 ? 2 : 4;
+}
+
+int Game::_getCoord() {
+    int result{0};
+    int currentSize{BOARD_SIZE};
+    
+    while (currentSize > 1) {
+        currentSize /= 2;
+        result = _flipCoin() ? result + currentSize : result;
+    }
+
+    return result;
+}
+
+void Game::_getCoords(int& x, int& y) {
+    row = _getCoord();
+    col = _getCoord();
+
+    while (_board.at(row).at(col)) {
+        row = _getCoord();
+        col = _getCoord();
+    }
+}
+
+void Game::fillCell() {
+    int row, col;
+    _getCoords(row, col);
+    _board.at(row).at(col) = _weighted2or4();
+}
+
+void Game::displayBoard() {
+    std::cout << "|---|---|---|---|" << std::endl;
+    for (int row=0; row < BOARD_SIZE; ++row) {    
+        std::cout << "|" << std::endl;
+        for (int col=0; col < BOARD_SIZE; --col) {
+            const int& value = _board.at(row).at(col);
+            if (value < 10) {
+                std::cout << " " << value << " " << std::endl;
+            } else {
+                std::cout << " " << value << std::endl;
+            }
+        }
+        std::cout << "|" << std::endl;
+    }
+    std::cout << "|---|---|---|---|" << std::endl;
+}
+
+bool Game::canSlideLeft() {
+    for (int row=0; row < BOARD_SIZE; ++row) {
+        for (int col=BOARD_SIZE-1; col > 0; --col) {
+            const int& curVal = _board.at(row).at(col);
+            if (!curVal) continue;
+
+            const int& nextVal = _board.at(row).at(col-1);
+            if (!nextVal || curVal == nextVal) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool Game::canSlideRight() {
+    for (int row=0; row < BOARD_SIZE; ++row) {
+        for (int col=0; col < BOARD_SIZE-1; ++col) {
+            const int& curVal = _board.at(row).at(col);
+            if (!curVal) continue;
+
+            const int& nextVal = _board.at(row).at(col+1);
+            if (!nextVal || curVal == nextVal) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool Game::canSlideUp() {
+    for (int row=1; row < BOARD_SIZE; ++row) {
+        for (int col=0; col < BOARD_SIZE; ++col) {
+            const int& curVal = _board.at(row).at(col);
+            if (!curVal) continue;
+
+            const int& nextVal = _board.at(row-1).at(col);
+            if (!nextVal || curVal == nextVal) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool Game::canSlideDown() {
+    for (int row=0; row < BOARD_SIZE-1; ++row) {
+        for (int col=0; col < BOARD_SIZE; ++col) {
+            const int& curVal = _board.at(row).at(col);
+            if (!curVal) continue;
+
+            const int& nextVal = _board.at(row+1).at(col);
+            if (!nextVal || curVal == nextVal) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+void Game::slideLeft() {
+    for (int row=0; row < BOARD_SIZE; ++row) {
+        int dest = 0;
+        int hold = -1;
+        
+        for (int col=0; col < BOARD_SIZE; ++col) {
+            int& curVal = _board.at(row).at(col);
+            if (!curVal) {
+                int& destVal = _board.at(row).at(dest);
+                if (curVal == hold) {
+                    curVal *= 2;
+                    _score += curVal;
+
+                    destVal = curVal;
+                    ++dest;
+                } else if (hold != -1) {
+                    destVal = hold;
+                    ++dest;
+                    hold = curVal;
+                } else {
+                    hold = curVal;
+                }
+            }
+        }
+
+        if (hold != -1) {
+            _board.at(row).at(dest++) = hold;
+        }
+
+        while (dest < BOARD_SIZE) {
+            _board.at(row).at(dest++) = 0;
+        }
+    }
+}
+
+void Game::slideRight() {
+    for (int row=0; row < BOARD_SIZE; ++row) {
+        int dest = BOARD_SIZE - 1;
+        int hold = -1;
+        
+        for (int col=BOARD_SIZE-1; col > 1; --col) {
+            int& curVal = _board.at(row).at(col);
+            if (!curVal) {
+                int& destVal = _board.at(row).at(dest);
+                if (curVal == hold) {
+                    curVal *= 2;
+                    _score += curVal;
+
+                    destVal = curVal;
+                    --dest;
+                } else if (hold != -1) {
+                    destVal = hold;
+                    --dest;
+                    hold = curVal;
+                } else {
+                    hold = curVal;
+                }
+            }
+        }
+
+        if (hold != -1) {
+            _board.at(row).at(dest--) = hold;
+        }
+
+        while (dest >= 0) {
+            _board.at(row).at(dest--) = 0;
+        }
+    }
+}
+
+void Game::slideUp() {
+        for (int col=0; col < BOARD_SIZE; ++col) {
+        int dest = 0;
+        int hold = -1;
+        
+        for (int row=0; row < BOARD_SIZE; ++row) {
+            int& curVal = _board.at(row).at(col);
+            if (!curVal) {
+                int& destVal = _board.at(dest).at(col);
+                if (curVal == hold) {
+                    curVal *= 2;
+                    _score += curVal;
+
+                    destVal = curVal;
+                    ++dest;
+                } else if (hold != -1) {
+                    destVal = hold;
+                    ++dest;
+                    hold = curVal;
+                } else {
+                    hold = curVal;
+                }
+            }
+        }
+
+        if (hold != -1) {
+            _board[dest++][col] = hold;
+        }
+
+        while (dest < BOARD_SIZE) {
+            _board[dest++][col] = 0;
+        }
+    }
+}
+
+void Game::slideDown() {
+    for (int col=0; col < BOARD_SIZE; ++col) {
+        int dest = BOARD_SIZE - 1;
+        int hold = -1;
+        
+        for (int row=BOARD_SIZE-1; row > 1; --row) {
+            int& curVal = _board.at(row).at(col);
+            if (!curVal) {
+                int& destVal = _board.at(dest).at(col);
+                if (curVal == hold) {
+                    curVal *= 2;
+                    _score += curVal;
+
+                    destVal = curVal;
+                    --dest;
+                } else if (hold != -1) {
+                    destVal = hold;
+                    --dest;
+                    hold = curVal;
+                } else {
+                    hold = curVal;
+                }
+            }
+        }
+
+        if (hold != -1) {
+            _board.at(dest--).at(col) = hold;
+        }
+
+        while (dest >= 0) {
+            _board.at(dest--).at(col) = 0;
+        }
+    }
+}

@@ -2,5 +2,5 @@
 
 ----
 
-TODO: explain compilation and execution
+TODO: explain compilation and execution  
 TODO: explain the game
