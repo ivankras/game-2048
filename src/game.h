@@ -6,8 +6,7 @@
 #define BOARD_SIZE 4
 #define N2 6
 #define D2 9
-// TODO: remove array, use vector
-
+#define TOP_UNDO_SCORE 4000
 
 class Game {
 private:

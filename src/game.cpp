@@ -59,17 +59,19 @@ void Game::fillCell() {
 void Game::displayBoard() {
     std::cout << "\033[2J\033[1;1H";  // Clear screen
     
-    std::cout << "|___________________|" << std::endl;
-    std::cout << "|----|----|----|----|" << std::endl;
+    std::cout << "|_______________________|" << std::endl;
+    std::cout << "|-----|-----|-----|-----|" << std::endl;
     for (int row=0; row < BOARD_SIZE; ++row) {    
         std::cout << "|";
         for (int col=0; col < BOARD_SIZE; ++col) {
             const int& value = _board.at(row).at(col);
             if (value < 10) {
-                std::cout << "  " << value << " |";
+                std::cout << "  " << value << "  |";
             } else if (value < 100) {
-                std::cout << " " << value << " |";
+                std::cout << "  " << value << " |";
             } else if (value < 1000) {
+                std::cout << " " << value << " |";
+            } else if (value < 10000) {
                 std::cout << " " << value << "|";
             } else {
                 std::cout << value << "|";
@@ -77,8 +79,8 @@ void Game::displayBoard() {
         }
         std::cout << std::endl;
     }
-    std::cout << "|----|----|----|----|" << std::endl;
-    std::cout << "|___________________|" << std::endl;
+    std::cout << "|-----|-----|-----|-----|" << std::endl;
+    std::cout << "|_______________________|" << std::endl;
     std::cout << "Score:\t" << _score << std::endl;
 }
 
@@ -147,7 +149,7 @@ bool Game::canSlideDown() {
 }
 
 bool Game::canUndo() {
-    return _undoable;
+    return _undoable && _score <= TOP_UNDO_SCORE;
 }
 
 void Game::slideLeft() {
