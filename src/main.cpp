@@ -17,6 +17,8 @@ int main() {
     };
     char inKey{'\0'};
 
+    system("stty raw");
+
     game.displayBoard();
     inKey = std::getchar();
     
@@ -65,6 +67,7 @@ bool handleInput(Game& game, char inKey) {
         }
         return true;
     case 'q':
+        system("stty cooked");
         return false;
     default:
         // Should never come here
