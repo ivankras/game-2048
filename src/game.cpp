@@ -4,7 +4,7 @@
 #include <vector>
 #include "game.h"
 
-Game::Game() : _score{0} {
+Game::Game() : _score{0}, _undoable{false} {
     for (int i=0; i < BOARD_SIZE; ++i) {
         std::vector<int> emptyRow(BOARD_SIZE, 0);
         _board.push_back(emptyRow);
@@ -44,6 +44,10 @@ void Game::_getCoords(int& row, int& col) {
         row = _getCoord();
         col = _getCoord();
     }
+}
+
+void Game::_saveBoard() {
+    _previousState = _board;
 }
 
 void Game::fillCell() {
@@ -142,7 +146,12 @@ bool Game::canSlideDown() {
     return false;
 }
 
+bool Game::canUndo() {
+    return _undoable;
+}
+
 void Game::slideLeft() {
+    _saveBoard();
     for (int row=0; row < BOARD_SIZE; ++row) {
         int dest = 0;
         int hold = -1;
@@ -177,9 +186,12 @@ void Game::slideLeft() {
             _board.at(row).at(dest++) = 0;
         }
     }
+
+    _undoable = true;
 }
 
 void Game::slideRight() {
+    _saveBoard();
     for (int row=0; row < BOARD_SIZE; ++row) {
         int dest = BOARD_SIZE-1;
         int hold = -1;
@@ -214,9 +226,13 @@ void Game::slideRight() {
             _board.at(row).at(dest--) = 0;
         }
     }
+
+    _undoable = true;
 }
 
 void Game::slideUp() {
+    _saveBoard();
+
     for (int col=0; col < BOARD_SIZE; ++col) {
         int dest = 0;
         int hold = -1;
@@ -251,9 +267,13 @@ void Game::slideUp() {
             _board.at(dest++).at(col) = 0;
         }
     }
+
+    _undoable = true;
 }
 
 void Game::slideDown() {
+    _saveBoard();
+
     for (int col=0; col < BOARD_SIZE; ++col) {
         int dest = BOARD_SIZE-1;
         int hold = -1;
@@ -288,12 +308,19 @@ void Game::slideDown() {
             _board.at(dest--).at(col) = 0;
         }
     }
+
+    _undoable = true;
+}
+
+void Game::undo() {
+    _undoable = false;
+    _board = _previousState;
 }
 
 bool Game::canPlay() {
     return canSlideLeft()
             || canSlideRight()
             || canSlideUp()
-            || canSlideDown();
-            // || canUndo()
+            || canSlideDown()
+            || canUndo();
 }

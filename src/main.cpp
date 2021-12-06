@@ -12,7 +12,7 @@ int main() {
         's',  // down
         'd',  // right
         'w',  // up
-        // 'z',  // undo
+        'z',  // undo
         'q'  // quit
     };
     char inKey{'\0'};
@@ -59,8 +59,11 @@ bool handleInput(Game& game, char inKey) {
             game.fillCell();
         }
         return true;
-    // case 'z':
-    //     break;
+    case 'z':
+        if (game.canUndo()) {
+            game.undo();
+        }
+        return true;
     case 'q':
         return false;
     default:

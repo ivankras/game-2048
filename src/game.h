@@ -12,13 +12,16 @@
 class Game {
 private:
     int _score;
+    bool _undoable;
     std::vector<std::vector<int>> _board;
+    std::vector<std::vector<int>> _previousState;
 
     Game();
     bool _flipCoin();
     int _weighted2or4();
     int _getCoord();
     void _getCoords(int& x, int& y);
+    void _saveBoard();
 
 public:
     static Game& init() {
@@ -56,7 +59,7 @@ public:
      * @return true if the player can undo their last slide
      * @return false otherwise
      */
-    // bool canUndo();
+    bool canUndo();
 
     /**
      * @brief Slide the board in the given direction and update the score
@@ -71,7 +74,7 @@ public:
      * and the last move was not an undo. If no slides are allowed but undo is allowed,
      * the game is not over
      */
-    // void undo();
+    void undo();
 
     /** 
      * @return true if the player has any possible moves left
